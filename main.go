@@ -11,6 +11,8 @@ func main() {
 		w.Write([]byte("OK"))
 	})
 
+	http.HandleFunc(("/api/v1/secret/{name}"), GetSecretHandler)
+
 	println("Barbican ES proxy listening on :3000")
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
