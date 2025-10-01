@@ -6,6 +6,7 @@ import (
 )
 
 func GetAuthToken() string {
+
 	url := os.Getenv("OS_AUTH_URL") + "/auth/tokens"
 
 	body := map[string]any{
@@ -20,7 +21,7 @@ func GetAuthToken() string {
 		},
 	}
 
-	resp, err := http.Post(url, "application/json", MapToBuffer(body))
+	resp, err := http.Post(url, "application/json", MapToBuffer(&body))
 	if err != nil {
 		panic(err)
 	}

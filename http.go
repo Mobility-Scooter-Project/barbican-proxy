@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 )
 
-func MapToBuffer(m map[string]any) *bytes.Buffer {
+func MapToBuffer(m *map[string]any) *bytes.Buffer {
 	data, err := json.Marshal(m)
 	if err != nil {
 		panic(err)

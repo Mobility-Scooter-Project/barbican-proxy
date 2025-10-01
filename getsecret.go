@@ -1,11 +1,29 @@
 package main
 
 import (
-	"log"
+	"encoding/json"
 	"net/http"
-
-	"github.com/redis/go-redis/v9"
 )
+
+type SecretMetadata struct {
+	//created      string
+	//updated      string
+	//status       string
+	//name         *string
+	//secretType   string `json:"secret_type"`
+	//algorithm    *string
+	//bitLength    *int `json:"bit_length"`
+	//mode         *string
+	//creator_id   *string
+	//contentTypes map[string]string `json:"content_types"`
+	SecretRef string `json:"secret_ref"`
+}
+
+type FetchSecretsResponse struct {
+	Secrets []SecretMetadata `json:"secrets"`
+	Next    *string          `json:"next"`
+	Total   int              `json:"total"`
+}
 
 /*
 *
@@ -14,39 +32,22 @@ import (
 3. If not found, query barbican for the uuid
 4. Once the uuid is found, query barbican for the secret if not cached
 */
-func GetSecretHandler(res http.ResponseWriter, req *http.Request) {
+func (s *AppService) GetSecretHandler(res http.ResponseWriter, req *http.Request) {
+	container := req.PathValue("container")
 	secretName := req.PathValue("name")
 	ctx := req.Context()
-	kv := InitKV()
 
-	secret, err := GetSecretFromCache(kv, ctx, secretName)
-
-	if err == redis.Nil {
-		uuid, err := GetSecretUUIDFromCache(kv, ctx, secretName)
-
-		if err == redis.Nil {
-			log.Printf("UUID cache miss [%s]", secretName)
-			data, err := GetSecretFromBarbicanByName(secretName)
-			println("Data: ", data)
-			if err != nil {
-				log.Printf("Error retrieving secret from Barbican: %v", err)
-				http.Error(res, "Internal Server Error", http.StatusInternalServerError)
-				return
-			}
-
-			return
-		}
-
-		println("UUID: ", uuid)
-		return
-	}
+	data, err := s.GetSecret(ctx, container, secretName)
 
 	if err != nil {
-		log.Printf("Error retrieving secret from cache: %v", err)
-		http.Error(res, "Internal Server Error", http.StatusInternalServerError)
+		res.Header().Set("Content-Type", "application/json")
+		res.WriteHeader(err.Status)
+		jsonErr := map[string]string{"error": err.Message}
+		jsonBytes, _ := json.Marshal(jsonErr)
+		res.Write(jsonBytes)
 		return
 	}
 
-	log.Printf("Secret cache hit [%s]", secretName)
-	res.Write([]byte(secret))
+	res.WriteHeader(http.StatusOK)
+	res.Write([]byte(data))
 }
