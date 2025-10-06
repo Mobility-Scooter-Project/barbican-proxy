@@ -46,6 +46,7 @@ func main() {
 
 	http.HandleFunc(("/api/v1/secrets/{container}/{name}"), service.GetSecretHandler)
 	http.HandleFunc(("/api/v1/secrets"), service.UploadSecretHandler)
+	http.HandleFunc(("/api/v1/containers"), service.CreateContainerHandler)
 
 	println("Barbican ES proxy listening on :3000")
 	log.Fatal(http.ListenAndServe(":3000", nil))

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"github.com/redis/go-redis/v9"
 )
 
 type SecretRef struct {
@@ -190,6 +191,12 @@ func (s *AppService) UploadSecretToContainer(ctx context.Context, container stri
 func (s *AppService) GetSecret(ctx context.Context, container string, key string) (string, *HttpError) {
 	// first get the secret ref from the cache
 	secretRefUuid, err := s.KV.HGet(ctx, "container:"+container, key).Result()
+
+	if err == redis.Nil {
+		s.Logger.Warn("Secret not found in cache", "container", container, "key", key)
+		return "", &HttpError{Status: http.StatusNotFound, Message: "Secret not found"}
+	}
+
 	if err != nil {
 		s.Logger.Error("Error getting secret from cache", "error", err)
 		return "", &HttpError{Status: http.StatusInternalServerError, Message: "Internal server error"}
@@ -218,4 +225,47 @@ func (s *AppService) GetSecret(ctx context.Context, container string, key string
 	}
 
 	return string(bodyBytes), nil
+}
+
+func (s* AppService) CreateContainer(ctx context.Context, containerName string) *HttpError {
+	createContainerBody := map[string]any{
+		"name": containerName,
+		"type": "generic",
+	}
+
+	resp, err := s.makeBarbicanRequest("POST", "/v1/containers", &createContainerBody)
+
+	if err != nil {
+		s.Logger.Error("Error creating container in Barbican", "error", err)
+		return &HttpError{Status: http.StatusInternalServerError, Message: "Internal server error"}
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusCreated {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		s.Logger.Error("Error creating container in Barbican", "resp", string(bodyBytes))
+		return &HttpError{Status: resp.StatusCode, Message: "Error creating container in Barbican"}
+	}
+
+	var containerResponse ContainerMetadata
+	decodeErr := json.NewDecoder(resp.Body).Decode(&containerResponse)
+	if decodeErr != nil {
+		s.Logger.Error("Error decoding Barbican response", "error", decodeErr)
+		return &HttpError{Status: http.StatusInternalServerError, Message: "Internal server error"}
+	}
+
+	// Cache container metadata
+	containerKey := "container:" + containerResponse.Name
+	// grab the uuid at the end of the container ref
+	containerValue := strings.Split(containerResponse.ContainerRef, "/")
+	if len(containerValue) == 0 {
+		s.Logger.Warn("Container ref is empty", "container", containerResponse.Name)
+		return &HttpError{Status: http.StatusInternalServerError, Message: "Internal server error"}
+	}
+	containerValueStr := containerValue[len(containerValue)-1]
+	s.Logger.Info("Caching container", "key", containerKey, "value", containerValueStr)
+	s.InMemoryCache.Set(containerKey, string(containerValueStr))
+
+	return nil
 }
