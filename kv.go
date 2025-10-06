@@ -9,6 +9,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+// InitKV initializes and returns a Redis client using environment variables for configuration.
 func InitKV() *redis.Client {
 	envErr := godotenv.Load()
 	if envErr != nil {

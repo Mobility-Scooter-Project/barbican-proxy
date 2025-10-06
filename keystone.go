@@ -5,8 +5,8 @@ import (
 	"os"
 )
 
+// GetAuthToken retrieves an authentication token from the OpenStack Identity service using application credentials.
 func GetAuthToken() string {
-
 	url := os.Getenv("OS_AUTH_URL") + "/auth/tokens"
 
 	body := map[string]any{

@@ -8,6 +8,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"istio.io/pkg/cache"
+	"github.com/lmittmann/tint"
 )
 
 type AppService struct {
@@ -22,8 +23,7 @@ type HttpError struct {
 }
 
 func main() {
-	jsonHandler := slog.NewJSONHandler(os.Stderr, nil)
-	logger := slog.New(jsonHandler)
+	logger := slog.New(tint.NewHandler(os.Stderr, nil))
 
 	inMemoryCache := cache.NewLRU(0, 0, 1000) // do not evict items based on time, only size
 	kv := InitKV()
@@ -44,10 +44,20 @@ func main() {
 		w.Write([]byte("OK"))
 	})
 
-	http.HandleFunc(("/api/v1/secrets/{container}/{name}"), service.GetSecretHandler)
+	http.HandleFunc(("/api/v1/secrets/{container}/{name}"), func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			service.GetSecretHandler(w, r)
+		case http.MethodDelete:
+			service.DeleteSecretHandler(w, r)
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			w.Write([]byte("Method Not Allowed"))
+		}
+	})
 	http.HandleFunc(("/api/v1/secrets"), service.UploadSecretHandler)
 	http.HandleFunc(("/api/v1/containers"), service.CreateContainerHandler)
 
-	println("Barbican ES proxy listening on :3000")
+	logger.Info("Starting server on :3000")
 	log.Fatal(http.ListenAndServe(":3000", nil))
 }
