@@ -1,0 +1,8 @@
+.env
+clouds.yaml
+.env.example
+bin
+.git
+deploy
+*.md
+http
