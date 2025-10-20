@@ -3,13 +3,12 @@ kind: Application
 metadata:
   name: barbican-proxy
   namespace: argocd
-  annotations:
-    kargo.akuity.io/authorized-stage: "msp:barbican-proxy-deploy"
 spec:
-  destination:
-    namespace: barbican-proxy
-    server: "https://kubernetes.default.svc"
   project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: barbican-proxy
+
   sources:
     - repoURL: "https://github.com/Mobility-Scooter-Project/mobility-scooter-infra.git"
       targetRevision: main
@@ -18,53 +17,42 @@ spec:
         values: |
           name: barbican-proxy
           replicas: 1
+
           image:
-            repository: ghcr.io/mobility-scooter-project/barbican-proxy
+            repository: ghcr.io/mobility-scooter-project/barbican-proxy/proxy
             tag: latest
             pullPolicy: IfNotPresent
+            # If GHCR is private, make sure the namespace has a matching imagePullSecret.
+
+          service:
+            port: 8080
+            targetPort: 3000
+
+          ingress:
+            enabled: true
+            subdomain: proxy
+            prefix: "/"
+            useRootPath: true
 
           resources:
             requests:
               cpu: "250m"
-              memory: "512Mi"
+              memory: "256Mi"
             limits:
               cpu: "500m"
-              memory: "1Gi"
+              memory: "512Mi"
 
-          ingress:
+          # Mount secret-based env (created from your env.proxy file)
+          envFrom:
+            - secretRef:
+                name: barbican-proxy-secrets
+
+          # Optional health checks (enable if the chart supports these keys)
+          probes:
             enabled: true
-            subdomain: barbican
-            prefix: "/api/v1"
-            useRootPath: true
-
-          database:
-            enabled: false
-
-          kv:
-            enabled: true
-            url: "redis://redis-service:6379"
-
-          queue:
-            enabled: false
-
-          service:
-            port: 3000
-            targetPort: 3000
-
-          env:
-            - name: OS_APPLICATION_CREDENTIAL_CLIENT_ID
-              value: "a017bf17b9ab4a8097ef311eb3defd63"
-            - name: OS_APPLICATION_CREDENTIAL_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: barbican-proxy-secrets
-                  key: os-client-secret
-            - name: OS_AUTH_URL
-              value: "https://js2.jetstream-cloud.org:5000/v3/"
-            - name: BARBICAN_URL
-              value: "https://js2.jetstream-cloud.org:9311"
-            - name: KV_UR
-              value: "redis://redis-service:6379"
+            path: /health
+            initialDelaySeconds: 5
+            periodSeconds: 10
 
   syncPolicy:
     automated:
