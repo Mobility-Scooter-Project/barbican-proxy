@@ -41,8 +41,8 @@ spec:
               cpu: "500m"
               memory: "512Mi"
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+    #automated:
+    #  prune: true
+    #  selfHeal: true
     syncOptions:
       - CreateNamespace=true

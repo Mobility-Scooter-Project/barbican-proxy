@@ -6,10 +6,17 @@ on:
       - main
       - develop
       - sarina-development
+    paths:
+      - "!docs/"
+      - "!http/"
   pull_request:
     branches:
       - main
       - develop
+    paths:
+      - "!docs/"
+      - "!http/"
+    
 
 env:
   REGISTRY: ghcr.io
