@@ -28,10 +28,7 @@ spec:
             targetPort: 3000
 
           ingress:
-            enabled: true
-            subdomain: barbican-proxy
-            prefix: "/"
-            useRootPath: true
+            enabled: false
 
           resources:
             requests:
