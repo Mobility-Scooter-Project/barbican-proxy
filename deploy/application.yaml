@@ -19,10 +19,9 @@ spec:
           replicas: 1
 
           image:
-            repository: ghcr.io/mobility-scooter-project/barbican-proxy/proxy
-            tag: latest
+            repository: ghcr.io/mobility-scooter-project/barbican-proxy/barbican-proxy
+            tag: sarina-development
             pullPolicy: IfNotPresent
-            # If GHCR is private, make sure the namespace has a matching imagePullSecret.
 
           service:
             port: 8080
@@ -30,7 +29,7 @@ spec:
 
           ingress:
             enabled: true
-            subdomain: proxy
+            subdomain: barbican-proxy
             prefix: "/"
             useRootPath: true
 
@@ -41,19 +40,6 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
-
-          # Mount secret-based env (created from your env.proxy file)
-          envFrom:
-            - secretRef:
-                name: barbican-proxy-secrets
-
-          # Optional health checks (enable if the chart supports these keys)
-          probes:
-            enabled: true
-            path: /health
-            initialDelaySeconds: 5
-            periodSeconds: 10
-
   syncPolicy:
     automated:
       prune: true
