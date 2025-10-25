@@ -37,6 +37,18 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
+
+          # Mount config map
+          envFrom:
+            - configMapRef:
+                name: barbican-proxy-config
+
+          # Enable Redis/KV
+          kv:
+            enabled: true
+            service:
+              name: redis-service
+              port: 6379
   syncPolicy:
     #automated:
     #  prune: true
