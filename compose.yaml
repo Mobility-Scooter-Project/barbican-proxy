@@ -19,12 +19,15 @@ services:
       - OS_APPLICATION_CREDENTIAL_CLIENT_SECRET=fmApR5i62JNZYH_vp41oRwPPaYIeUOBDKEFOP3NlRfLltYgSqHNZPxI7BcV0HWGyRzbglurhdpNfngCOgcTjuw
       - OS_AUTH_URL=https://js2.jetstream-cloud.org:5000/v3/
       - BARBICAN_URL=https://js2.jetstream-cloud.org:9311
-      - KV_URL=redis://kv:6379
+      - KV_URL=kv:6379
     depends_on:
-      - kv
+      kv:
+        condition: service_started
     networks:
       - barbican-network
 
 networks:
   barbican-network:
     driver: bridge
+
+# run command: 'docker compose up --build' to test locally on machine
