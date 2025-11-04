@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: barbican-proxy
+  name: barbican-proxy-helm
   namespace: argocd
 spec:
   project: default
@@ -39,7 +39,7 @@ spec:
             memory: "512Mi"
 
         #pass env variables directly
-        #Helm chart will create a ConfigMap from these
+        #Helm chart will create a ConfigMap from this
         env:
           - name: OS_APPLICATION_CREDENTIAL_CLIENT_ID
             value: "a017bf17b9ab4a8097ef311eb3defd63"
