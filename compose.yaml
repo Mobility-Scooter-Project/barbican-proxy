@@ -5,3 +5,26 @@ services:
       - "6379:6379"
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - barbican-network
+
+  barbican-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - OS_APPLICATION_CREDENTIAL_CLIENT_ID=a017bf17b9ab4a8097ef311eb3defd63
+      - OS_APPLICATION_CREDENTIAL_CLIENT_SECRET=fmApR5i62JNZYH_vp41oRwPPaYIeUOBDKEFOP3NlRfLltYgSqHNZPxI7BcV0HWGyRzbglurhdpNfngCOgcTjuw
+      - OS_AUTH_URL=https://js2.jetstream-cloud.org:5000/v3/
+      - BARBICAN_URL=https://js2.jetstream-cloud.org:9311
+      - KV_URL=redis://kv:6379
+    depends_on:
+      - kv
+    networks:
+      - barbican-network
+
+networks:
+  barbican-network:
+    driver: bridge

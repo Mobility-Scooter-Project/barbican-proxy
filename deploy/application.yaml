@@ -9,49 +9,59 @@ spec:
     server: https://kubernetes.default.svc
     namespace: barbican-proxy
 
-  sources:
-    - repoURL: "https://github.com/Mobility-Scooter-Project/mobility-scooter-infra.git"
-      targetRevision: main
-      path: charts/api
-      helm:
-        values: |
-          name: barbican-proxy
-          replicas: 1
+  source:
+    repoURL: "https://github.com/Mobility-Scooter-Project/mobility-scooter-infra.git"
+    targetRevision: main
+    path: charts/api
+    helm:
+      values: |
+        name: barbican-proxy
+        replicas: 1
 
-          image:
-            repository: ghcr.io/mobility-scooter-project/barbican-proxy/barbican-proxy
-            tag: sarina-development
-            pullPolicy: IfNotPresent
+        image:
+          repository: ghcr.io/mobility-scooter-project/barbican-proxy/barbican-proxy
+          tag: sarina-development
+          pullPolicy: IfNotPresent
 
-          service:
-            port: 8080
-            targetPort: 3000
+        service:
+          port: 8080
+          targetPort: 3000
 
-          ingress:
-            enabled: false
+        ingress:
+          enabled: false
 
-          resources:
-            requests:
-              cpu: "250m"
-              memory: "256Mi"
-            limits:
-              cpu: "500m"
-              memory: "512Mi"
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
 
-          # Mount config map
-          envFrom:
-            - configMapRef:
-                name: barbican-proxy-config
+        #pass env variables directly
+        #Helm chart will create a ConfigMap from these
+        env:
+          - name: OS_APPLICATION_CREDENTIAL_CLIENT_ID
+            value: "a017bf17b9ab4a8097ef311eb3defd63"
+          - name: OS_APPLICATION_CREDENTIAL_CLIENT_SECRET
+            value: "fmApR5i62JNZYH_vp41oRwPPaYIeUOBDKEFOP3NlRfLltYgSqHNZPxI7BcV0HWGyRzbglurhdpNfngCOgcTjuw"
+          - name: OS_AUTH_URL
+            value: "https://js2.jetstream-cloud.org:5000/v3/"
+          - name: BARBICAN_URL
+            value: "https://js2.jetstream-cloud.org:9311"
 
-          # Enable Redis/KV
-          kv:
-            enabled: true
-            service:
-              name: redis-service
-              port: 6379
+        kv:
+          enabled: true
+          connectionStringEnvVarName: KV_URL
+
+        database:
+          enabled: false
+        queue:
+          enabled: false
+
   syncPolicy:
-    #automated:
-    #  prune: true
-    #  selfHeal: true
+    # automated:
+    # prune: true
+    #selfHeal: true
     syncOptions:
       - CreateNamespace=true
