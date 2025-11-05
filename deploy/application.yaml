@@ -38,22 +38,12 @@ spec:
             cpu: "500m"
             memory: "512Mi"
 
-        #pass env variables directly
-        #Helm chart will create a ConfigMap from this
-        env:
-          - name: OS_APPLICATION_CREDENTIAL_CLIENT_ID
-            value: "a017bf17b9ab4a8097ef311eb3defd63"
-          - name: OS_APPLICATION_CREDENTIAL_CLIENT_SECRET
-            value: "fmApR5i62JNZYH_vp41oRwPPaYIeUOBDKEFOP3NlRfLltYgSqHNZPxI7BcV0HWGyRzbglurhdpNfngCOgcTjuw"
-          - name: OS_AUTH_URL
-            value: "https://js2.jetstream-cloud.org:5000/v3/"
-          - name: BARBICAN_URL
-            value: "https://js2.jetstream-cloud.org:9311"
+        envFrom:
+          - secretRef:
+              name: barbican-proxy-secrets
 
         kv:
-          enabled: true
-          connectionStringEnvVarName: KV_URL
-
+          enabled: false
         database:
           enabled: false
         queue:
