@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: barbican-proxy-helm
+  name: barbican-proxy
   namespace: argocd
 spec:
   project: default
@@ -37,7 +37,8 @@ spec:
           limits:
             cpu: "500m"
             memory: "512Mi"
-
+        
+        # this part I am confused on
         envFrom:
           - secretRef:
               name: barbican-proxy-secrets
