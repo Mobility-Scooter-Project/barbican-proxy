@@ -14,33 +14,24 @@ spec:
     path: charts/api
     helm:
       values: |
-        nameOverride: barbican-proxy
-        fullnameOverride: barbican-proxy
+        name: barbican-proxy
+        replicas: 1
 
         image:
-          repository: ghcr.io/mobility-scooter-project/barbican-proxy
+          repository: ghcr.io/mobility-scooter-project/barbican-proxy/barbican-proxy
           tag: sarina-development
           pullPolicy: IfNotPresent
 
-        replicas: 1
-
         service:
           port: 8080
-          targetPort: 8080
-        containerPort: 8080
+          targetPort: 3000
 
-        env:
-          - name: OS_AUTH_URL
-            value: "https://js2.jetstream-cloud.org:5000/v3/"
-          - name: BARBICAN_URL
-            value: "https://js2.jetstream-cloud.org:9311"
-          - name: KV_URL
-            value: "redis://kv.barbican-proxy.svc.cluster.local:6379"
+        envFrom:
+          - secretRef:
+              name: barbican-proxy-secrets
 
         kv:
-          enabled: true
-          connectionStringEnvVarName: KV_URL
-
+          enabled: false
         database:
           enabled: false
         queue:
@@ -60,4 +51,3 @@ spec:
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
-      - ApplyOutOfSyncOnly=true
