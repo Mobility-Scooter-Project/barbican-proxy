@@ -1,16 +1,15 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: barbican-proxy
+  name: barbican-proxy-deploy
   namespace: argocd
 spec:
   project: default
   destination:
     server: https://kubernetes.default.svc
     namespace: barbican-proxy
-
   source:
-    repoURL: "https://github.com/Mobility-Scooter-Project/mobility-scooter-infra.git"
+    repoURL: https://github.com/Mobility-Scooter-Project/mobility-scooter-infra.git
     targetRevision: main
     path: charts/api
     helm:
