@@ -15,19 +15,33 @@ spec:
     path: charts/api
     helm:
       values: |
-        name: barbican-proxy
-        replicas: 1
+        nameOverride: barbican-proxy
+        fullnameOverride: barbican-proxy
 
         image:
-          repository: ghcr.io/mobility-scooter-project/barbican-proxy/barbican-proxy
+          repository: ghcr.io/mobility-scooter-project/barbican-proxy
           tag: sarina-development
           pullPolicy: IfNotPresent
 
+        replicas: 1
+
         service:
           port: 8080
-          targetPort: 3000
+          targetPort: 8080
+        containerPort: 8080
 
-        ingress:
+        env:
+          OS_AUTH_URL: "https://js2.jetstream-cloud.org:5000/v3/"
+          BARBICAN_URL: "https://js2.jetstream-cloud.org:9311"
+          KV_URL: "redis://kv.barbican-proxy.svc.cluster.local:6379"
+
+        kv:
+          enabled: true
+          connectionStringEnvVarName: KV_URL
+
+        database:
+          enabled: false
+        queue:
           enabled: false
 
         resources:
@@ -37,22 +51,15 @@ spec:
           limits:
             cpu: "500m"
             memory: "512Mi"
-        
-        # this part I am confused on
-        envFrom:
-          - secretRef:
-              name: barbican-proxy-secrets
 
-        kv:
-          enabled: false
-        database:
-          enabled: false
-        queue:
+        ingress:
           enabled: false
 
   syncPolicy:
-    # automated:
-    # prune: true
-    #selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+    # automated:
+    #prune: true
+    #selfHeal: true
+
