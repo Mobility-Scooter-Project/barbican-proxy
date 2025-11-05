@@ -31,9 +31,12 @@ spec:
         containerPort: 8080
 
         env:
-          OS_AUTH_URL: "https://js2.jetstream-cloud.org:5000/v3/"
-          BARBICAN_URL: "https://js2.jetstream-cloud.org:9311"
-          KV_URL: "redis://kv.barbican-proxy.svc.cluster.local:6379"
+          - name: OS_AUTH_URL
+            value: "https://js2.jetstream-cloud.org:5000/v3/"
+          - name: BARBICAN_URL
+            value: "https://js2.jetstream-cloud.org:9311"
+          - name: KV_URL
+            value: "redis://kv.barbican-proxy.svc.cluster.local:6379"
 
         kv:
           enabled: true
@@ -59,7 +62,3 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ApplyOutOfSyncOnly=true
-    # automated:
-    #prune: true
-    #selfHeal: true
-
