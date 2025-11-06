@@ -19,12 +19,9 @@ spec:
           replicas: 1
 
           image:
-            repository: ghcr.io/mobility-scooter-project/barbican-proxy
-            tag: latest
+            repository: ghcr.io/mobility-scooter-project/barbican-proxy/barbican-proxy
+            tag: sarina-development
             pullPolicy: IfNotPresent
-
-          imagePullSecrets:
-            - name: ghcr-secret
 
           service:
             port: 3000
@@ -35,10 +32,10 @@ spec:
 
           resources:
             requests:
-              cpu: "100m"   
+              cpu: "100m"      
               memory: "128Mi"  
             limits:
-              cpu: "500m"      
+              cpu: "500m"     
               memory: "512Mi"  
 
           database:
@@ -49,16 +46,18 @@ spec:
             enabled: true
             connectionStringEnvVarName: "KV_URL"
 
-          queue:
-            enabled: false
-
           env:
             OS_AUTH_URL: "https://js2.jetstream-cloud.org:5000/v3/"
             BARBICAN_URL: "https://js2.jetstream-cloud.org:9311"
+   
+            OS_APPLICATION_CREDENTIAL_CLIENT_ID: "a017bf17b9ab4a8097ef311eb3defd63"
+            OS_APPLICATION_CREDENTIAL_CLIENT_SECRET: "fmApR5i62JNZYH_vp41oRwPPaYIeUOBDKEFOP3NlRfLltYgSqHNZPxI7BcV0HWGyRzbglurhdpNfngCOgcTjuw"
+
+            KV_URL: "redis://localhost:6379"
 
   syncPolicy:
     automated:
-      prune: true
-      selfHeal: true
+      prune: true     
+      selfHeal: true   
     syncOptions:
       - CreateNamespace=true
