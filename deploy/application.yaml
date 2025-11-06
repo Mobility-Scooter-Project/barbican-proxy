@@ -1,76 +1,62 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: barbican-proxy-deploy
+  name: barbican-proxy
   namespace: argocd
 spec:
   project: default
   destination:
     server: https://kubernetes.default.svc
     namespace: barbican-proxy
-  source:
-    repoURL: https://github.com/Mobility-Scooter-Project/mobility-scooter-infra.git
-    targetRevision: main
-    path: charts/api
-    helm:
-      values: |
-        name: barbican-proxy
-        replicas: 1
 
-        image:
-          repository: ghcr.io/mobility-scooter-project/barbican-proxy/barbican-proxy
-          tag: sarina-development
-          pullPolicy: IfNotPresent
+  sources:
+    - repoURL: "https://github.com/Mobility-Scooter-Project/mobility-scooter-infra.git"
+      targetRevision: main
+      path: charts/api
+      helm:
+        values: |
+          name: barbican-proxy
+          replicas: 1
 
-        service:
-          port: 8080
-          targetPort: 3000
+          image:
+            repository: ghcr.io/mobility-scooter-project/barbican-proxy/barbican-proxy
+            tag: sarina-development
+            pullPolicy: IfNotPresent
 
-        env:
-          - name: OS_APPLICATION_CREDENTIAL_CLIENT_ID
-            valueFrom:
-              secretKeyRef:
-                name: barbican-proxy-secrets
-                key: OS_APPLICATION_CREDENTIAL_CLIENT_ID
-          - name: OS_APPLICATION_CREDENTIAL_CLIENT_SECRET
-            valueFrom:
-              secretKeyRef:
-                name: barbican-proxy-secrets
-                key: OS_APPLICATION_CREDENTIAL_CLIENT_SECRET
-          - name: OS_AUTH_URL
-            valueFrom:
-              secretKeyRef:
-                name: barbican-proxy-secrets
-                key: OS_AUTH_URL
-          - name: BARBICAN_URL
-            valueFrom:
-              secretKeyRef:
-                name: barbican-proxy-secrets
-                key: BARBICAN_URL
-          - name: KV_URL
-            valueFrom:
-              secretKeyRef:
-                name: barbican-proxy-secrets
-                key: KV_URL
+          service:
+            port: 3000
+            targetPort: 3000
 
-        kv:
-          enabled: false
-        database:
-          enabled: false
-        queue:
-          enabled: false
+          ingress:
+            enabled: false
 
-        resources:
-          requests:
-            cpu: "250m"
-            memory: "256Mi"
-          limits:
-            cpu: "500m"
-            memory: "512Mi"
+          # got these values from deployment.yaml under infra repo not sure if I need to change this
+          resources:
+            requests:
+              cpu: "100m"      
+              memory: "128Mi" 
+            limits:
+              cpu: "500m"     
+              memory: "512Mi"  
 
-        ingress:
-          enabled: false
+          database:
+            enabled: false
+            shouldMigrate: false
+
+          kv:
+            enabled: true
+            connectionStringEnvVarName: "KV_URL"
+
+          queue:
+            enabled: false
+
+          env:
+            OS_AUTH_URL: "https://js2.jetstream-cloud.org:5000/v3/"
+            BARBICAN_URL: "https://js2.jetstream-cloud.org:9311"
 
   syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
