@@ -19,9 +19,12 @@ spec:
           replicas: 1
 
           image:
-            repository: ghcr.io/mobility-scooter-project/barbican-proxy/barbican-proxy
-            tag: sarina-development
+            repository: ghcr.io/mobility-scooter-project/barbican-proxy
+            tag: latest
             pullPolicy: IfNotPresent
+
+          imagePullSecrets:
+            - name: ghcr-secret
 
           service:
             port: 3000
@@ -30,14 +33,13 @@ spec:
           ingress:
             enabled: false
 
-          # got these values from deployment.yaml in infra repo, not sure if they need to be modified
           resources:
             requests:
-              cpu: "100m"     
-              memory: "128Mi" 
+              cpu: "100m"   
+              memory: "128Mi"  
             limits:
-              cpu: "500m"     
-              memory: "512Mi" 
+              cpu: "500m"      
+              memory: "512Mi"  
 
           database:
             enabled: false
