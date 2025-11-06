@@ -11,7 +11,7 @@ spec:
 
   sources:
     - repoURL: "https://github.com/Mobility-Scooter-Project/mobility-scooter-infra.git"
-      targetRevision: main           
+      targetRevision: main
       path: charts/api
       helm:
         values: |
@@ -19,7 +19,7 @@ spec:
           replicas: 1
 
           image:
-            repository: ghcr.io/mobility-scooter-project/barbican-proxy
+            repository: ghcr.io/mobility-scooter-project/barbican-proxy/barbican-proxy
             tag: sarina-development
             pullPolicy: IfNotPresent
 
@@ -30,13 +30,14 @@ spec:
           ingress:
             enabled: false
 
+          # got these values from deployment.yaml in infra repo, not sure if they need to be modified
           resources:
             requests:
-              cpu: "100m"
-              memory: "128Mi"
+              cpu: "100m"     
+              memory: "128Mi" 
             limits:
-              cpu: "500m"
-              memory: "512Mi"
+              cpu: "500m"     
+              memory: "512Mi" 
 
           database:
             enabled: false
@@ -50,16 +51,8 @@ spec:
             enabled: false
 
           env:
-            - name: OS_AUTH_URL
-              value: "https://js2.jetstream-cloud.org:5000/v3/"
-            - name: BARBICAN_URL
-              value: "https://js2.jetstream-cloud.org:9311"
-            - name: KV_URL
-              value: "redis://kv:6379"
-
-          secretRef:
-            enabled: true
-            name: barbican-proxy-credentials
+            OS_AUTH_URL: "https://js2.jetstream-cloud.org:5000/v3/"
+            BARBICAN_URL: "https://js2.jetstream-cloud.org:9311"
 
   syncPolicy:
     automated:
