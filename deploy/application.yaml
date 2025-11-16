@@ -32,11 +32,11 @@ spec:
 
           resources:
             requests:
-              cpu: "100m"      
-              memory: "128Mi"  
+              cpu: "100m"
+              memory: "128Mi"
             limits:
-              cpu: "500m"     
-              memory: "512Mi"  
+              cpu: "500m"
+              memory: "512Mi"
 
           database:
             enabled: false
@@ -46,18 +46,12 @@ spec:
             enabled: true
             connectionStringEnvVarName: "KV_URL"
 
-          env:
-            OS_AUTH_URL: "https://js2.jetstream-cloud.org:5000/v3/"
-            BARBICAN_URL: "https://js2.jetstream-cloud.org:9311"
-   
-            OS_APPLICATION_CREDENTIAL_CLIENT_ID: "a017bf17b9ab4a8097ef311eb3defd63"
-            OS_APPLICATION_CREDENTIAL_CLIENT_SECRET: "fmApR5i62JNZYH_vp41oRwPPaYIeUOBDKEFOP3NlRfLltYgSqHNZPxI7BcV0HWGyRzbglurhdpNfngCOgcTjuw"
-
-            KV_URL: "redis://localhost:6379"
+          #once api Helm chart is updated to support envSecretName,
+          #envSecretName: barbican-proxy-env
 
   syncPolicy:
     #automated:
-      #prune: true     
-      #selfHeal: true   
+      #prune: true
+      #selfHeal: true
     syncOptions:
       - CreateNamespace=true
